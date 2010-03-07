@@ -8,7 +8,10 @@
 (defn abs [x] (if (> x 0) x (- x)))
 (defn square [x] (* x x))
 (defn cube [x] (* x x x))
-(defn avg [x y] (/ (+ x y) 2))
+(defn avg [x & more]
+  (/ (+ x (apply + more)) (+ 1 (count more))))
+(defn pow [x n]
+  (. (. java.math.BigInteger (valueOf x)) (pow n)))
 
 ; returns a function which calculates the derivative
 ; of the given function `g`.
@@ -27,6 +30,9 @@
                       nextval
                       (recur nextval))))]
     (trynext first-guess)))
+
+(defn average-damp [f]
+  (fn [x] (avg x (f x))))
 
 (defn newton-transform [g]
   (fn [x]
