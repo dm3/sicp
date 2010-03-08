@@ -14,8 +14,8 @@
 (defn y-point [a]
   (second a))
 
-(defn print-point [a]
-  (println "(" (x-point a) "," (y-point a) ")"))
+(defn same-point? [a b]
+  (= a b))
 
 ; Surprise! Segments are also pairs. Could probably use multimethods here, but why bother?
 (defn make-segment
@@ -28,6 +28,9 @@
 
 (defn end-segment [a]
   (second a))
+
+(defn same-segment? [a b]
+  (= a b))
 
 ; The meat of the exercise which is fairly obvious if you are able to imagine two-dimensional coordinate axis.
 ; If you are not, please draw it and put it before your eyes.
@@ -43,9 +46,13 @@
     (make-point (+ (/ (x-point base-point) 2) (x-point (start-segment a)))
                 (+ (/ (y-point base-point) 2) (y-point (start-segment a))))))
 
+(def *point00* (make-point 0 0))
+(def *point11* (make-point 1 1))
+(def *point22* (make-point 2 2))
+
 (deftest midpoint-test
   (is (= (midpoint-segment
-           (make-segment (make-point 0 0) (make-point 1 1)))
+           (make-segment *point00* *point11*))
          (make-point 0.5 0.5)))
   (is (= (midpoint-segment
            (make-segment (make-point 2 2) (make-point 3 3)))
@@ -56,6 +63,7 @@
 
 ; 2.3
 ; This one got messy as I tried to stuff more logic into segment/vector manipulations.
+; for a clean and correct solution please look at http://mark.reid.name/sap/minilight-clojure-vectors.html
 
 (defn length-segment
   " length of the given segment as a sqrt(x^2 + y^2) "
@@ -88,50 +96,53 @@
   [a b]
   (= (dot-product (normalize a) (normalize b)) 0))
 
-(defn make-rect
+(defn make-rect-seg
   " Makes rectangle out of a point and two segments satisfying both conditions:
     1. both segments must have equal x-points
     2. the angle between the segments must equal 90 degrees "
   [width height]
   (if (not (orthogonal-segments? width height))
       (println "Width and Height segments aren't orthogonal!")
-      (if (not (and (= (x-point (start-segment height)) (x-point (start-segment width)))
-                    (= (y-point (start-segment height)) (y-point (start-segment width)))))
+      (if (not (and (same-point? (x-point (start-segment height)) (x-point (start-segment width)))
+                    (same-point? (y-point (start-segment height)) (y-point (start-segment width)))))
           (println "Segments do not start at the same point!")
           ; valid data received
-          (list width height))))
+          [width height])))
+
+(defn make-rect-pts
+  " Makes a rectangle out of 4 points.
+
+    A -- B
+    |    |
+    C -- D "
+  [a b c d]
+  (if (not (orthogonal-segments? (make-segment a b) (make-segment a c)))
+      (println "Width and Height segments aren't orthogonal!")
+      [a b c d]))
 
 (defn width-rect [r]
-  (length-segment (first r)))
+  (length-segment (get r 0)))
 
 (defn height-rect [r]
-  (length-segment (second r)))
+  (length-segment (get r 1)))
 
 (defn area-rect [r]
   (* (width-rect r) (height-rect r)))
 
+(def *segment0040* (make-segment (make-point 0 0) (make-point 4 0)))
+(def *segment0004* (make-segment (make-point 0 0) (make-point 0 4)))
+(def *segment5566* (make-segment (make-point 5 5) (make-point 6 6)))
+(def *segment5564* (make-segment (make-point 5 5) (make-point 6 4)))
+
 (deftest area-test
-  (is (= (area-rect
-           (make-rect (make-segment (make-point 0 0) (make-point 4 0))
-                      (make-segment (make-point 0 0) (make-point 0 4))))
-         16))
-  (is (close-enough? (area-rect
-                       (make-rect (make-segment (make-point 5 5) (make-point 6 6))
-                                  (make-segment (make-point 5 5) (make-point 6 4))))
-         2 tolerance)))
+  (is (= (area-rect (make-rect-seg *segment0040* *segment0004*)) 16))
+  (is (close-enough? (area-rect (make-rect-seg *segment5566* *segment5564*)) 2 tolerance)))
 
 (defn perimeter-rect [r]
   (+ (* 2 (width-rect r)) (* 2 (height-rect r))))
 
 (deftest perimeter-test
-  (is (= (perimeter-rect
-           (make-rect (make-segment (make-point 0 0) (make-point 4 0))
-                      (make-segment (make-point 0 0) (make-point 0 4))))
-         16))
-  (is (close-enough? (perimeter-rect
-                       (make-rect (make-segment (make-point 5 5) (make-point 6 6))
-                                  (make-segment (make-point 5 5) (make-point 6 4))))
-         (* (sqrt 2) 4)
-         tolerance)))
+  (is (= (perimeter-rect (make-rect-seg *segment0040* *segment0004*)) 16))
+  (is (close-enough? (perimeter-rect (make-rect-seg *segment5566* *segment5564*)) (* (sqrt 2) 4) tolerance)))
 
 (run-tests 'e2-2-3)
