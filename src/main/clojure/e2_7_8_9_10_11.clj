@@ -17,14 +17,14 @@
 ; To write like Lisa, you gotta think like Lisa. E-Valuator.
 ; Having (a0, b0) and (a1, b1) where a0 <= b0 and a1 <= b1
 ; we need to perform (a0, b0) - (a1, b1). One solutions that jumps right at us is
-; the (a0, b0) - (a1, b1) = (a0 - a1, b0 - b1). But is that really so?
+; the (a0, b0) - (a1, b1) = (a0 - a1, b0 - b1) equation. But is that really so?
 (defn sub-interval [a b]
   (let [l (- (lower-bound a) (lower-bound b))
         u (- (upper-bound a) (upper-bound b))]
     (make-interval (min l u) (max l u))))
 
 ; There exist several possible combinations of two intervals (I didn't examine the combinations
-; where intervals overlap as my ASCII drawing skills are already pushed to the maximum):
+; where intervals join at their start/end points as my ASCII drawing skills are already pushed to the maximum):
 (deftest sub-interval-test
   ; 1. ----|---\----|---\-------
   ;        a0  a1  b0   b1
@@ -103,5 +103,57 @@
 ; of had been written? We run it on a platform that hadn't existed at that time? Ok, ok, I see your point.
 ; If the management ever plans to migrate our codebase to scheme, we'll have our loops already unrolled and functions inlined. Checked.
 ; P.S. and if we won't have any loops to unroll, we'll unroll recursion.
+(defn mul-interval [a b]
+  (let [la (lower-bound a)
+        ua (upper-bound a)
+        lb (lower-bound b)
+        ub (upper-bound b)]
+          ; 1.
+          ; --*--|---\----|---\-------
+          ;   0  la  lb  ua   ub
+    (cond (and (pos? la) (pos? lb))
+          (make-interval (* la lb) (* ua ub))
+          ; 2.
+          ; -----|---\----|---\---*---
+          ;      la  lb  ua   ub  0
+          (and (neg? ua) (neg? ub))
+          (make-interval (* ua ub) (* la lb))
+          ; 3.
+          ; -\--------\-*-|--------|-
+          ;  lb      ub 0 la       ua
+          (and (pos? la) (neg? ub))
+          (make-interval (* ua lb) (* la ub))
+          ; 4. opposite of 3
+          ; -|--------|-*-\--------\-
+          ;  la      ua 0 lb       ub
+          (and (pos? lb) (neg? ua))
+          (make-interval (* la ub) (* lb ua))
+          ; 5.
+          ; -\--------\--|----*---|---
+          ;  lb      ub  la   0   ua
+          (and (neg? la) (pos? ua) (neg? ub))
+          (make-interval (* ua lb) (* la lb))
+          ; 6. opposite of 5
+          ; -|--------|--\----*---\---
+          ;  la      ua  lb   0   ub
+          (and (neg? lb) (pos? ub) (neg? ua))
+          (make-interval (* ub la) (* la lb))
+          ; 7.
+          ; -\---*----\--|--------|---
+          ;  lb  0   ub  la       ua
+          (and (neg? lb) (pos? ub) (pos? la))
+          (make-interval (* lb ua) (* ub ua))
+          ; 8. opposite of 7
+          ; -|---*----|--\--------\---
+          ;  la  0   ua  lb       ub
+          (and (neg? la) (pos? ua) (pos? lb))
+          (make-interval (* la ub) (* ua ub))
+          ; 9. the last one where two multiplications are required
+          ; ----|--\--*--|---\---------
+          ;     la lb 0 ua   ub
+          :else
+          (make-interval (min (* la ub) (* lb ua)) (max (* la lb) (* ua ub))))))
+
+; This one really got on me nerves. Won't even write the tests for it.
 
 (run-tests 'e2-7-8-9-10-11)
