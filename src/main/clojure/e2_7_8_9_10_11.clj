@@ -1,18 +1,12 @@
 (ns e2-7-8-9-10-11
   (:use [clojure.contrib.test-is :only (deftest is run-tests)])
   (:use [util.util :only (avg)])
+  (:use [util.interval :only (make-interval lower-bound upper-bound mul-interval add-interval div-interval)])
   (:use [clojure.contrib.generic.math-functions :only ()]))
 
 ; 2.7
 ; Same old intervals composed of cons. Invariant: lower bound always comes before the upper bound.
-(defn make-interval [a b] [a b])
-
-(defn lower-bound [z]
-  (get z 0))
-
-(defn upper-bound [z]
-  (get z 1))
-
+; defined at util/interval
 ; 2.8
 ; To write like Lisa, you gotta think like Lisa. E-Valuator.
 ; Having (a0, b0) and (a1, b1) where a0 <= b0 and a1 <= b1
@@ -46,22 +40,6 @@
 ; I'll give some examples, no proofs attached.
 (defn radius-interval [z]
   (avg (upper-bound z) (lower-bound z)))
-
-(defn add-interval [a b]
-  (make-interval (+ (lower-bound a) (lower-bound b))
-                 (+ (upper-bound a) (upper-bound b))))
-
-(defn mul-interval [a b]
-  (let [p1 (* (lower-bound a) (lower-bound b))
-        p2 (* (lower-bound a) (upper-bound b))
-        p3 (* (upper-bound a) (lower-bound b))
-        p4 (* (upper-bound a) (upper-bound b))]
-    (make-interval (min p1 p2 p3 p4) (max p1 p2 p3 p4))))
-
-(defn div-interval [a b]
-  (mul-interval a
-    (make-interval (/ 1 (upper-bound b))
-                   (/ 1 (lower-bound b)))))
 
 (defn proportional?
   " Takes an operation on intervals, an op on numbers and two intervals. Returns true if the result is proportional
@@ -103,7 +81,7 @@
 ; of had been written? We run it on a platform that hadn't existed at that time? Ok, ok, I see your point.
 ; If the management ever plans to migrate our codebase to scheme, we'll have our loops already unrolled and functions inlined. Checked.
 ; P.S. and if we won't have any loops to unroll, we'll unroll recursion.
-(defn mul-interval [a b]
+(defn mul-interval-2 [a b]
   (let [la (lower-bound a)
         ua (upper-bound a)
         lb (lower-bound b)
