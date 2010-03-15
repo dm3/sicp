@@ -1,6 +1,5 @@
 (ns e2-24-25-26-27-28-29
-  (:use clojure.test)
-  (:use [clojure.contrib.generic.math-functions :only ()]))
+  (:use clojure.test))
 
 ; 2.24
 ; a) What will (list 1 (list 2 (list 3 4))) print? First guess:
@@ -149,15 +148,20 @@
 ; However, we also need to compare the torques of the branches if they do not contain any sub-mobiles.
 ;
 ; I bumped into a difficulty while solving this problem, as I didn't really understand what it meant
-; for a binary mobile to be balanced.
+; for a binary mobile to be balanced. You need to calculate a torque not only for a branch which contains
+; the weight, but for the branches which contain sub-mobiles too. It may be obvious for you, but it wasn't
+; obvious for me.
 
 (defn torque [b]
   (* (branch-weight b) (branch-len b)))
 
+; Clojure supports mutually recursive functions, however, you need an additional definition
+; so that the compiler wouldn't give you an 'Unable to resolve symbol' exception.
+(def balanced?)
+
 (defn branch-balanced? [b]
   (let [structure (branch-structure b)]
-    (if (weight? structure)
-        true
+    (if (weight? structure) true
         (balanced? structure))))
 
 (defn balanced? [m]
