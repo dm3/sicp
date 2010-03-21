@@ -2,7 +2,6 @@
   (:use clojure.test)
   (:use [clojure.contrib.generic.math-functions :only (sqr)]))
 
-
 (defn leaf? [t]
   (not (sequential? t)))
 
