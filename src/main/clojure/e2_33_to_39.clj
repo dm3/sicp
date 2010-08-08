@@ -1,5 +1,5 @@
 (ns e2-33-to-39
-  (:use [util.util :only (id)])
+  (:use [util.util :only (zip)])
   (:use clojure.test)
   (:use [clojure.contrib.generic.math-functions :only (sqr)]))
 
@@ -116,13 +116,6 @@
 ; zip m v
 ; and fuse them by mapping the result with
 ; \(row, el) -> foldl (\acc rowel -> acc + rowel * el ) 0 row
-
-; Really clean implementation of zip. I wasn't aware of the (vector) function, so I tried to write
-; the haskellish recursive (accumulate-n - like) solution. However, I couldn't properly handle varargs, so I looked it up.
-; The first link google returned for 'clojure varargs' was the www.mail-archive.com/clojure@googlegroups.com/msg24733.html
-; which (surprise!) had the implementation for zip.
-(defn zip [& lists]
-  (apply map vector lists))
 
 (defn matrix-times-vector [m v]
   ; for each row in the matrix (m)

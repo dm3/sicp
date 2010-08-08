@@ -51,8 +51,45 @@
 (defn and-then [f g]
   (fn [x] (g (f x))))
 
+; Really clean implementation of zip. I wasn't aware of the (vector) function, so I tried to write
+; the haskellish recursive (accumulate-n - like) solution. However, I couldn't properly handle varargs, so I looked it up.
+; The first link google returned for 'clojure varargs' was the www.mail-archive.com/clojure@googlegroups.com/msg24733.html
+; which (surprise!) had the implementation for zip.
+(defn zip [& lists]
+  (apply map vector lists))
+
 ; (repfun f 3) == (compose (compose f f) f)
 (defn repfun [f n]
   (if (= n 1)
       f
       (compose f (repfun f (dec n)))))
+
+; I had so much trouble writing this function... The scary thing is, this
+; wasn't the first time I had to write it.
+(defn permutations [xs]
+  (let [len (count xs)]
+    ; xs can never be [], only if the initial argument is []
+    (cond (= len 0) []
+          (= len 1) [xs]
+          :else (mapcat (fn [x] (map #(cons x %) (permutations (remove #(= x %) xs))))
+                        xs))))
+
+; http://groups.google.com/group/clojure/browse_thread/thread/d0ecd17cdeb740f7
+(defn drop-nth [n coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (concat (take n s) (drop (inc n) s)))))
+
+; ------------- validation --------
+; http://stackoverflow.com/questions/1640311/should-i-use-a-function-or-a-macro-to-validate-arguments-in-clojure
+(defmacro assert* [val test]
+  `(let [result# ~test]
+     (when (not result#)
+       (throw (Exception.
+                (str "Test failed: " (quote ~test)
+                     " for " (quote ~val) " = " ~val))))))
+
+(defmulti validate* (fn [val test] test))
+
+(defn validate [& tests]
+  (doseq [test tests] (apply validate* test)))
