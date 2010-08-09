@@ -92,7 +92,7 @@
 ; 8-Queen problem.
 
 (def *board-start* 0)
-(def *board-size* 4)
+(def *board-size* 5)
 ; At first I've made a mistake of producing a 8x8 matrix in empty-board
   ;(take *board-size* (repeat (enum *board-start* *board-size*))))
 ; It should produce an empty set of positions.
@@ -200,5 +200,36 @@
         (print "*")
         (print ".")))
     (print "\n")))
+
+; 2.43 - no coding required
+; Hugo Doom has screwed up by reordering statements inside of the `queens`
+; function. We are challenged with pointing out what exactly went wrong in
+; the disfunctional function and to analyze its complexity assuming the correct
+; `queens` function produces the result for the board sized N in T.
+
+; In the original function we have (n - row)
+; 1. (flatmap (map f [0 .. n]) '([])) => 1 flatmap iteration + 1 * N map iterations
+; 2. (flatmap (map f [0 .. n]) '(([0 0]) ([1 0]) .. ([n 0]))) => N flatmap iterations + N * N map iterations
+; 3. (flatmap (map f [0 .. n]) '(([0 0] [0 0]) ([1 0] [0 0]) .. ([n 0] [n 0]))) N flatmap iterations + N * N * N map iterations
+
+; Let's only take into account flatmap and map iterations. Then we can see that
+; `queen-cols` is O(N^(N-1) + N^N) as each flatmap iteration creates N * (combinations
+; created during previous iteration) combinations. However, if we look at the
+; `queen-cols` itself, it's only called N+1 times, which is linear.
+
+; In the modified function we have `queen-cols` fully evaluated N times for
+; each invocation, so we have O((N^(N-1) + N^N)^N) which is much scarier. The modified
+; `queen-cols` spawns a tree recursive process calling `queen-cols` for each N.
+
+(defn failed-queens [_] ; unused parameter so that this would be a valid function definition
+ (letfn [(queen-cols [column]
+   (if (= column (dec *board-start*))
+     (list empty-board)
+     (filter #(safe? column %)
+             (mapcat (fn [row]
+                       (map #(add-queen row column %)
+                            (queen-cols (dec column))))
+                     (enum *board-start* *board-size*)))))]
+   (queen-cols (dec *board-size*))))
 
 (run-tests 'e2-40-to-43)
