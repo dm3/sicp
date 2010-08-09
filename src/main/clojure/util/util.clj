@@ -74,6 +74,20 @@
           :else (mapcat (fn [x] (map #(cons x %) (permutations (remove #(= x %) xs))))
                         xs))))
 
+(defn forall
+  " @param f - (A -> Bool)
+    @param xs - [A]
+    @return true if f holds for all x in xs, false otherwise "
+  [f xs]
+  (reduce #(and %1 %2) true (map f xs)))
+
+(defn exists
+  " @param f - (A -> Bool)
+    @param xs - [A]
+    @return true if f holds for any x in xs, false otherwise "
+  [f xs]
+  (reduce #(or %1 %2) false (map f xs)))
+
 ; http://groups.google.com/group/clojure/browse_thread/thread/d0ecd17cdeb740f7
 (defn drop-nth [n coll]
   (lazy-seq

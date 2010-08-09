@@ -1,6 +1,6 @@
 (ns e2-40-to-43
   (:use clojure.test)
-  (:use [util.util :only (zip, permutations, drop-nth)])
+  (:use [util.util :only (zip, permutations, exists)])
   (:use [clojure.contrib.generic.math-functions :only (sqrt, round)])
   (:use [clojure.contrib.seq-utils :only (flatten)]))
 
@@ -96,7 +96,7 @@
 ; At first I've made a mistake of producing a 8x8 matrix in empty-board
   ;(take *board-size* (repeat (enum *board-start* *board-size*))))
 ; It should produce an empty set of positions.
-(def empty-board (take *board-size* (repeat [])))
+(def empty-board ())
 
 (defn at-x [pos] (first pos))
 (defn at-y [pos] (second pos))
@@ -107,6 +107,7 @@
       (> (at-y pos) *board-size*)
       (< (at-y pos) *board-start*)))
 
+; -------- safe?
 (defn- generate-path [f init]
   (take-while #(not (outside-board? %)) (iterate f init)))
 
@@ -127,6 +128,8 @@
 (defn- exact-queen-hit [who whom]
   (cond (= who whom) true
         :else (or
+            ; this could have been easily checked by checking the slope of the
+            ; line formed by two queens (kx + a = y, hits if k = 1).
             (contains? (set (concat (path-to :up-right who)
                                     (path-to :up-left who)
                                     (path-to :down-right who)
@@ -151,39 +154,44 @@
   (is (not (queen-hits (pos 1 1) (pos 2 3))))
   (is (not (queen-hits (pos 2 3) (pos 1 1)))))
 
+(defn get-queen-at-column [column positions]
+  (let [result (filter #(= (at-y %) column) positions)]
+    (if (empty? result) nil (first result))))
+
 (defn safe?
   #^{:doc " @param k - vertical of the current queen
             @param positions - positions of queens in verticals 1..(k-1).
                               Type: List (Int, Int)
-            @return true if the position at index k is safe "
-    :test (fn [] (assert (and (k >= *board-start*) (>= (count positions) k))))  }
-  [k positions]
-  (let [at-k (nth positions k)]
-    (empty? (filter #(queen-hits % at-k) (drop-nth k positions)))))
+            @return true if the position at index k is safe " }
+    ;:test (fn [] (assert (and (k >= *board-start*) (>= (count positions) k))))  }
+  [column positions]
+  (let [at-column (get-queen-at-column column positions)]
+    (not (exists #(queen-hits % at-column) (remove #(= % at-column) (vec positions))))))
 
 (deftest test-safe
   (is (not (safe? 1 [(pos 0 0) (pos 1 1)])))
-  (is (not (safe? 1 [(pos 0 0) (pos 1 0) (pos 2 3)])))
-  (is (safe? 1 [(pos 0 0) (pos 1 5) (pos 2 3)])))
+  (is (not (safe? 1 [(pos 0 0) (pos 1 1) (pos 2 3)])))
+  (is (safe? 3 [(pos 0 0) (pos 1 3) (pos 2 1)])))
 
-(defn adjoin-position
+; ------------ queens
+(defn add-queen
   " @param new-row - horizontal for the new queen
     @param new-column - vertical for the new queen
-    @param rest-of-queens - queens placed before this queen. They are
+    @param queens-already-placed - queens placed before this queen. They are
                             guaranteed to be placed correctly "
-  [new-row new-column rest-of-queens]
-  (cons (pos new-row new-column) rest-of-queens))
+  [new-row new-column queens-already-placed]
+  (cons (pos new-row new-column) queens-already-placed))
 
 (def queens
-  (letfn [(queen-cols [k]
-    (if (= k (dec *board-start*))
-      empty-board
-      (filter #(safe? k %)
-              (mapcat (fn [rest-of-queens]
-                        (map #(adjoin-position % k rest-of-queens)
-                             (enum *board-start* *board-size*)))
-                      (queen-cols (dec k))))))]
-    (queen-cols (dec *board-size*))))
+ (letfn [(queen-cols [column]
+   (if (= column (dec *board-start*))
+     (list empty-board)
+     (filter #(safe? column %)
+             (mapcat (fn [queens-already-placed]
+                       (map #(add-queen % column queens-already-placed)
+                            (enum *board-start* *board-size*)))
+                     (queen-cols (dec column))))))]
+   (queen-cols (dec *board-size*))))
 
 (defn print-queens [positions]
   (doseq [y (reverse (enum *board-start* *board-size*))]
