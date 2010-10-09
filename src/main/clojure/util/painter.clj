@@ -3,7 +3,6 @@
            (java.awt.event ActionListener MouseListener MouseAdapter)
            (java.awt GridLayout Color)))
 
-; My first try at swing
 (def exit-listener
   (proxy [ActionListener] []
     (actionPerformed [evt] (System/exit 0))))
@@ -14,50 +13,61 @@
       (.add (doto (JMenuItem. "Close")
         (.addActionListener exit-listener)))))))
 
-(defn- moveSquare [x y]
-  (print "moving to " x y))
-
-(defn- add-mouse-listeners [component]
-  (doto component
-    (.addMouseListener (proxy [MouseAdapter] []
-                         (mousePressed [e]
-                           (moveSquare (.getX e) (.getY e)))))
-    (.addMouseMotionListener (proxy [MouseAdapter] []
-                               (mouseDragged [e]
-                                 (moveSquare (.getX e) (.getY e)))))))
-
 (defn read-image [path]
   (javax.imageio.ImageIO/read (java.io.File. path)))
 
-(defn transforming-canvas [transform]
+; shape to be drawn inside transforming-canvas
+(defn rectangle
+  " @param g - Graphics object
+    @param dim - Dimension of the parent component "
+  [g dim]
+  (let [r-width (/ (.width dim) 2)
+        r-height (/ (.height dim) 2)
+        r-x (/ (.width dim) 4)
+        r-y (/ (.height dim) 4)]
+  (doto g
+    (.drawRect r-x r-y r-width r-height)
+    (.setColor Color/BLACK)
+    (.fillRect r-x r-y r-width r-height))))
+
+(defn transforming-canvas
+  " @param transform - AffineTransform to be applied to the drawn shape
+    @param shape - a transformation function :: Graphics -> () "
+  [transform shape]
   (doto (proxy [JComponent] []
           (paint [g]
-            (doto g
-              (.setColor Color/WHITE)
-              (.fillRect 0 0 20 20)
-              (.setTransform transform)
-              (.setColor Color/BLACK)
-              (.drawRect 50 50 50 50)
-              (.fillOval 100 100 100 100))))
+            (let [size (proxy-super getSize)]
+              (do
+                (doto g ;background
+                  (.setColor Color/WHITE)
+                  (.fillRect 0 0 (.width size) (.height size))
+                  (.setTransform transform))
+                (shape g size)))))
     (.setOpaque true)
     (.setDoubleBuffered true)))
 
-
-(defn panel-for [image]
-  (add-mouse-listeners
-    (doto (proxy [JPanel] [(GridLayout. 0 1)]
-      (paintComponent [g]
-        (.drawImage g image 0 0 nil)))
-      (.setBorder (javax.swing.BorderFactory/createLineBorder Color/BLACK))
-      (.setBackground Color/RED)
-      (.setPreferredSize (java.awt.Dimension. 365 280))
-      (.setOpaque false))))
+(defn panel-for [transform]
+  (doto (JPanel. (GridLayout. 0 1))
+  ; (doto (proxy [JPanel] [(GridLayout. 0 1)]
+  ;   (paintComponent [g]
+  ;     (.drawImage g image 0 0 nil)))
+    (.setBorder (javax.swing.BorderFactory/createLineBorder Color/BLACK))
+    (.setBackground Color/RED)
+    (.setPreferredSize (java.awt.Dimension. 365 280))
+    (.setOpaque false)
+    (.add (transforming-canvas transform rectangle))))
 
 (defn in-frame [painter]
   (doto (JFrame. "Painter frame")
-    (.setContentPane (panel-for (read-image "src/main/resources/pic.jpg")))
+    (.setContentPane (panel-for painter))
     (.setJMenuBar menu)
     ;(.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
     (.pack)
     (.setVisible true)))
 
+;; API
+(defn rect [transform]
+  (in-frame transform))
+
+(defn ident [transform] transform)
+(defn right-split
