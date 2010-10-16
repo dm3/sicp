@@ -38,8 +38,13 @@
   (defn make-product [a & x] (concat (list '* a) x))
   (put-binding 'deriv '+ (fn [args v] (make-sum (deriv (first args) v)
                                                 (deriv (rest-or-one (rest args)) v))))
-  (put-binding 'deriv '* (fn [args v] (make-product (deriv (first args) v)
-                                                    (deriv (rest-or-one (rest args)) v)))))
+  (put-binding 'deriv '* (fn [args v] (make-sum (make-product (deriv (rest-or-one (rest args)) v) (first args))
+                                                (make-product (deriv (first args) v) (rest-or-one (rest args)))))))
+
+(deftest test-ops
+  (install-deriv-ops)
+  (is (= (deriv '(+ x 3) 'x) '(+ 1 0)))
+  (is (= (deriv '(* x y) 'x) '(+ (* 0 x) (* 1 y)))))
 
 ; c)
 ; Too lazy to actually implement this as I'd need to copy my exponentiation procedure from ex 2.57
@@ -101,8 +106,8 @@
                      (reduce register-op {} (partition 2 bindings))))))
 
 (defn install-records []
-  (defn get-person-a [person] [{:name 'John :salary 1000}])
-  (defn get-person-b [person] [{:sex 'Male :name 'Rob :salary 2000}])
+  (defn get-person-a [person] (first (filter #(= (:name %) person) [{:name 'John :salary 1000}])))
+  (defn get-person-b [person] (first (filter #(= (:surname %) person) [{:sex 'Male :surname 'Rob :salary 2000}])))
   (register-file 'department-a
     'get-person get-person-a)
   (register-file 'department-b
@@ -113,23 +118,33 @@
 ; :salary. If it was scheme, I would have used 'salary as :salary is a clojure
 ; convention for map keys.
 
-(defn get-in-files [files op item]
+(defn get-in-files
+  "Returns a sequence of elements matching the given `item` in the list of
+  given `files` selected by the given `op` (operation)"
+  [files op item]
   (mapcat #(let [v ((get % op) item)]
                  ; I think there is a clojure idiom which lets to turn nils into
                  ; empty seqs...
-                 (if (nil? v) [] v)) files))
+                 (if (nil? v) [] [v])) files))
 
 (defn get-salary
-  "Returns a list of salaries for persons matching the given person through all
-  of the departments"
+  "Returns a salary for the given person. Searches through all of the departments"
   [person]
-  (map #(get % :salary) (get-in-files (vals (deref *file-registry*)) 'get-person person)))
+  (first (map #(get % :salary) (get-in-files (vals (deref *file-registry*)) 'get-person person))))
 
 ; c)
 ; We actually did the largest part of it in b) as the requirements for b)
 ; didn't even mention we could use the list of files as an input.
-(defn find-employee-record [person files]
-  (get-in-files files 'get-person person))
+(defn find-employee-record
+  "Returns one record matching the person in the given files as persons should
+  be unique even across departments"
+  [person files]
+  (first (get-in-files files 'get-person person)))
+
+(deftest test-find-employee
+  (install-records)
+  (is (= (find-employee-record 'John (vals (deref *file-registry*))) (get-record 'department-a 'John)))
+  (is (= (get-salary 'John) (:salary (get-record 'department-a 'John)))))
 
 ; d)
 ; When Insatiable Inc. acquires a new company (or creates a new department)
@@ -140,3 +155,5 @@
 ;     ... ...)
 ;
 ; and make sure that the person entries have a `:salary` tag.
+
+(run-tests 'e2-73-74)
