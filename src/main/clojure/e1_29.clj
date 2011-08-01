@@ -1,17 +1,24 @@
-(ns e1-29)
+;; ## Exercise 1.29
+(ns e1-29
+  (:use clojure.test))
 
 (defn cube [x] (* x x x))
 
-(defn sum [term a nextf b]
+(defn sum
+  "Sums up all of the terms."
+  [term a nextf b]
   (if (> a b)
       0
       (+ (term a)
          (sum term (nextf a) nextf b))))
 
-; f - function to integrate
-; a, b - points to integrate between
-; n - precision (the more, the better)
-(defn integral [f a b n]
+(defn integral
+  "Takes an integral of the given function `f`.
+
+   * f - function to integrate
+   * a, b - points to integrate between
+   * n - precision (the more, the better)"
+  [f a b n]
   ;h = (b - a) / n
   (let [h (/ (- b a) n)]
     (defn term [ind]
@@ -25,4 +32,7 @@
     (* (sum term 0 nextf n)
        (/ h 3))))
 
-(integral cube 0 1 1000)
+(deftest test-integral
+  (is (= (integral cube 0 1 1000) 751/3000)))
+
+(run-tests 'e1-29)
