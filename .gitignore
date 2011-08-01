@@ -1,2 +1,4 @@
 *.back
 target
+*.log
+marginalia.*

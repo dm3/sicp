@@ -35,13 +35,14 @@
 
 (deftest doubl-test
   " (inc (inc 1)) "
-  (is (= ((doubl inc) 1) 3)))
+  (is (= ((doubl inc) 1) 3))
 
 ; This one is tricky. It's obvious, that ((double inc) x) will perform an (inc (inc x)). Lets see what is going to happen with (((doubl doubl) inc) x).
 ; Lets expand doubles one by one:
 ; (((doubl doubl) inc) x) -> (fn [x] (doubl (doubl inc)) x) -> (fn [x] (doubl (inc (inc x)))) -> (fn [x] (inc (inc (inc (inc x)))))
 ; So we can say that nesting doubls once will result in the argument function being applied 4 times.
-(is (= (((doubl doubl) inc) 1) 5))
+  (is (= (((doubl doubl) inc) 1) 5)))
+
 ; And what about (((doubl (doubl doubl)) inc) x) ? Oh, it will clearly apply the inc function 8 times, will it?
 ; Actually, no. For the sake of clarity we'll call (doubl doubl) a (quad). Lets see what happens here
 ; (((doubl quad) inc) x) -> ((quad (quad inc)) x)
