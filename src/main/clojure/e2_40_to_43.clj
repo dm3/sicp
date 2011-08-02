@@ -231,5 +231,3 @@
                             (queen-cols (dec column))))
                      (enum *board-start* *board-size*)))))]
    (queen-cols (dec *board-size*))))
-
-(run-tests 'e2-40-to-43)

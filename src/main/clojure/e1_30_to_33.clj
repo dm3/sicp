@@ -63,7 +63,7 @@
 (defn twoinc [x]
   ((compose inc inc) x))
 
-;; Also use `product` to compute approximations to `pi`:
+;; Also use `product` to compute approximations to \\(pi\\):
 
 (defn pi
   "Calculates pi with the specified accuracy"
@@ -168,7 +168,7 @@
 
 ;; Show how to express the following using `filtered-accumulate`:
 
-;; *  the sum of the squares of the prime numbers in the interval `a` to `b`:
+;; *  the sum of the squares of the prime numbers in the interval \\(a\\) to \\(b\\):
 (defn squares [a b]
   (filtered-acc prime? + 0 square a inc b))
 
@@ -176,13 +176,11 @@
 (deftest squares-test
   (is (= (squares 1 10) 84)))
 
-;; *  the product of all the positive integers less than `n` that are relatively
-;;    prime to `n` (i.e., all positive integers `i < n` such that `GCD(i,n) = 1`).
+;; *  the product of all the positive integers less than \\(n\\) that are relatively
+;;    prime to \\(n\\) (i.e., all positive integers \\(i < n\\) such that \\(GCD(i,n) = 1\\)).
 (defn prod-less-than [n]
   (filtered-acc (curry prime-for? n) + 0 id 1 inc n))
 
 ; ------- tests ---------------
 (deftest squares-test
   (is (= (prod-less-than 10) 20)))
-
-(run-tests 'e1-30-to-33)

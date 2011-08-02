@@ -61,5 +61,3 @@
 ; two elements: 'quote and 'abracadabra.
 (deftest test-abracadabra
   (is (= (first ''abracadabra) 'quote)))
-
-(run-tests 'e2-53-54-55)

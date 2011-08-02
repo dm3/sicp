@@ -117,5 +117,3 @@
 
 (put 'is-zero? 'scheme-symbol zero-number?)
 (put 'is-zero? 'scheme-number zero-number?)
-
-(run-tests 'e2-77-to-80)

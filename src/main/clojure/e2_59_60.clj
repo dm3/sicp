@@ -72,5 +72,3 @@
     (is (if (or (element-of-set? i s1) (element-of-set? i s2))
             (element-of-set? i (union-set2 s1 s2))
             true))))
-
-(run-tests 'e2-59-60)

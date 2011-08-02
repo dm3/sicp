@@ -86,5 +86,3 @@
 (deftest test-iter-fp
   (is (close-enough? (iterative-fixed-point cos 1.0) 0.739082 tolerance))
   (is (close-enough? (iterative-fixed-point cos 1.0) (fixed-point cos 1.0) tolerance)))
-
-(run-tests 'e1-43-44-45-46)

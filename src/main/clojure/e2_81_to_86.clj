@@ -285,5 +285,3 @@
 ;
 ; All of the operations which are currently registered for the 'complex tag will
 ; have to be reimplemented to use the `apply-generic` procedure themselves.
-
-(run-tests 'e2-81-to-86)

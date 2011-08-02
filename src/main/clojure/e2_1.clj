@@ -53,5 +53,3 @@
 (deftest test-mul2
   (is (= (mul-rat (make-rat2 2 3) (make-rat2 3 4)) (make-rat2 6 12)))
   (is (= (mul-rat (make-rat2 -2 3) (make-rat2 3 -4)) (make-rat2 6 12))))
-
-(run-tests 'e2-1)

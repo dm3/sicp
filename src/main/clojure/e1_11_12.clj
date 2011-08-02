@@ -48,5 +48,3 @@
   (is (= (pascal 1 1) 1))
   (is (= (pascal 3 2) 2))
   (is (= (pascal 5 3) 6)))
-
-(run-tests 'e1-11-12)

@@ -26,7 +26,7 @@
         (recur (inc ind) (/ (n ind) (+ (d ind) result)))))]
   (iter 1 0)))
 
-;; Both of the tests should result in the same value (`~= 1/phi`).
+;; Both of the tests should result in the same value \\(\approx 1/phi\\).
 (deftest test-cont-frac
   (close-enough?
     (cont-frac (const 1.0) (const 1.0) 100)
@@ -40,7 +40,7 @@
 
 ;; ### 1.38
 
-;; Result should be `~= e - 2`.
+;; Result should be \\(\approx e - 2\\).
 (deftest test-cont-frac-non-iter
   (close-enough?
     (cont-frac (const 1.0)
@@ -70,5 +70,3 @@
     (tan-cf 20 100)
     (tan 20)
     0.001))
-
-(run-tests 'e1-37-38-39)

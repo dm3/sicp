@@ -144,5 +144,3 @@
 (deftest perimeter-test
   (is (= (perimeter-rect (make-rect-seg *segment0040* *segment0004*)) 16))
   (is (close-enough? (perimeter-rect (make-rect-seg *segment5566* *segment5564*)) (* (sqrt 2) 4) tolerance)))
-
-(run-tests 'e2-2-3)

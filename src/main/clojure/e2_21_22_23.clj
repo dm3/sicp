@@ -63,5 +63,3 @@
   (if (empty? xs) nil
       (do (f (first xs))
           (recur f (rest xs)))))
-
-(run-tests 'e2-21-22-23)

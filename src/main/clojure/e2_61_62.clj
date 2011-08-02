@@ -44,6 +44,3 @@
      s2 (cc/set (cc/int))]
     ; pre-sort the arguments to union-set-ord as it expects both sets well-behaved
     (is (= (seq (sort (concat s1 s2))) (seq (union-set-ord (sort s1) (sort s2)))))))
-
-
-(run-tests 'e2-61-62)

@@ -108,5 +108,3 @@
 (deftest plus-test
   ; should be equal to (*two*)
   (is (= (((plus (add-1 *zero*) (add-1 *zero*)) #(+ 1 %)) 0) 2)))
-
-(run-tests 'e2-4-5-6)

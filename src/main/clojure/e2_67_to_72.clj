@@ -229,5 +229,3 @@
 ; (of length 'm') we need to encode it by performing a traversal on a tree of
 ; max 'n' levels (where 'n' is the number of symbols), so the order of growth
 ; of `encode` for |message|='m' and |tree|='n' is O(n*m).
-
-(run-tests 'e2-67-to-72)

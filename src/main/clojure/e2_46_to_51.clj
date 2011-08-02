@@ -122,5 +122,3 @@
                        (make-segment (make-vect 0 1) (make-vect 1 0))]) f))
 
 ; c)/d) I think I'll just skip those...
-
-(run-tests 'e2-46-to-51)

@@ -189,5 +189,3 @@
 (deftest test-my-reverse
   (is (= (my-reverse-foldr [1 2 3]) [3 2 1]))
   (is (= (my-reverse-foldl [1 2 3]) [3 2 1])))
-
-(run-tests 'e2-33-to-39)

@@ -37,5 +37,3 @@
 ; modify datatypes when new operations are added. If we were to choose message
 ; passing we would need to modify each datatype present in the system when new
 ; function (operation) got added.
-
-(run-tests 'e2-75-76)

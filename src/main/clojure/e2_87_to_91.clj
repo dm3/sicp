@@ -385,5 +385,3 @@
 ;;  (let [tag (fn [x] x)]
 ;;    (put-op 'add '(poly poly) #(tag (add-poly %1 %2)))
 ;;    (put-op 'make 'poly #(tag (make-poly %1 %2)))))
-
-(run-tests 'e2-87-to-91)

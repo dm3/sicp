@@ -209,5 +209,3 @@
 (deftest test-lookup
   (is (= (lookup 2 (list->tree [1 2 5 6 11])) 2))
   (is (= (lookup 9 (list->tree [1 2 5 6 11])) nil)))
-
-(run-tests 'e2-63-to-66)

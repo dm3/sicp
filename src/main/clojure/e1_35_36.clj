@@ -6,8 +6,8 @@
 ;; ### 1.35
 ;;
 ;; Show that the golden ratio (section 1.2.2) is a fixed point of the
-;; transformation `x -> 1 + 1/x`, and use this fact to compute by means of the
-;; `fixed-point` procedure.
+;; transformation \\(x \leftarrow 1 + 1/x\\), and use this fact to compute by
+;; means of the `fixed-point` procedure.
 
 (defn fixed-point [f first-guess]
   (let [trynext (fn [guess]
@@ -25,17 +25,17 @@
 
 ;; ### 1.36
 ;;
-;; Find a solution to `x^x = 1000` by finding a fixed point of
-;; `x -> log(1000)/log(x)`.
+;; Find a solution to $$x^x = 1000$$ by finding a fixed point of
+;; $$x \rightarrow log(1000)/log(x)$$.
 
-;; With no damping `(log1000/logx)`
+;; With no damping: \\(log(1000) / log(x)\\)
 (deftest test-fixed-point-no-damping
    (is (close-enough?
          (fixed-point (fn [x] (/ (Math/log 1000) (Math/log x))) 2)
          4.5555
          tolerance)))
 
-;; With damping `(log1000/logx + x)/2`
+;; With damping: \\((log(1000) / log(x) + x) / 2\\)
 (deftest test-fixed-point-damping
    (is (close-enough?
          (fixed-point (fn [x] (/ (+ (/ (Math/log 1000) (Math/log x)) x) 2)) 2)
@@ -43,5 +43,3 @@
          tolerance)))
 
 ;; Compare the number of steps this takes with and without average damping.
-
-(run-tests 'e1-35-36)

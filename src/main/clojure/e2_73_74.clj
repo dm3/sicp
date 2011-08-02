@@ -155,5 +155,3 @@
 ;     ... ...)
 ;
 ; and make sure that the person entries have a `:salary` tag.
-
-(run-tests 'e2-73-74)

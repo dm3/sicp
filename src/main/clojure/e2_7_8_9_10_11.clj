@@ -133,5 +133,3 @@
           (make-interval (min (* la ub) (* lb ua)) (max (* la lb) (* ua ub))))))
 
 ; This one really got on me nerves. Won't even write the tests for it.
-
-(run-tests 'e2-7-8-9-10-11)

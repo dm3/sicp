@@ -78,5 +78,3 @@
 (deftest test-same-parity
   (is (= (same-parity 1 2 3 4 5 6 7) [1 3 5 7]))
   (is (= (same-parity 2 3 4 5 6 7) [2 4 6])))
-
-(run-tests 'e2-17-18-19-20)

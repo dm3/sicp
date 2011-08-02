@@ -148,5 +148,3 @@
 ;; the operations for intervals need to check for identity, so that
 ;;
 ;; `r2/r2 = 1` iff `r2` IS `r2`.
-
-(run-tests 'e2-12-13-14-15-16)

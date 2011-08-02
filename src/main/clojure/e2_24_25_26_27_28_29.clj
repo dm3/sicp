@@ -175,5 +175,3 @@
 
 ; d) If we change the representation, only the accessor functions will change as all other functions
 ; are defined in terms of the accessors.
-
-(run-tests 'e2-24-25-26-27-28-29)
