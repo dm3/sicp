@@ -1,4 +1,12 @@
-(ns e1-20)
+;; ## Exercise 1.21
+(ns e1-21
+  (:use clojure.test))
+
+;; Use the smallest-divisor procedure to find the smallest divisor of each of
+;; the following numbers: 199, 1999, 19999.
+
+;; For it we'll need to implement the procedures described earlier in the
+;; chapter.
 
 (defn divides? [a b]
   (= (rem b a) 0))
@@ -24,6 +32,9 @@
 (defn prime? [n]
   (= (smallest-divisor n) n))
 
-(smallest-divisor 199)
-(smallest-divisor 1999)
-(smallest-divisor 19999)
+;; And the answer is...
+(deftest test-smallest-divisor
+  (are [x y] (= (smallest-divisor x) y)
+        199 199
+        1999 1999
+        19999 7))

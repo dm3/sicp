@@ -2,6 +2,11 @@
 (ns e1-29
   (:use clojure.test))
 
+;; Define a procedure that takes as arguments f, a, b, and n and returns the
+;; value of the integral, computed using Simpson's Rule. Use your procedure to
+;; integrate cube between 0 and 1 (with n = 100 and n = 1000), and compare the
+;; results to those of the integral procedure shown above.
+
 (defn cube [x] (* x x x))
 
 (defn sum
