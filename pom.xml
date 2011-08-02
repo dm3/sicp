@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <description>
-        Exercises from the book "Structure and Interpretation of Computer Programs"
+        Exercises from the book 'Structure and Interpretation of Computer Programs'
         (http://mitpress.mit.edu/sicp/full-text/book/book.html).
     </description>
     <scm>

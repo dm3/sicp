@@ -81,8 +81,9 @@
   (apply-generic 'lt x y))
 
 ; packages
-(defn install-number-package []
+(defn install-number-package
   "Installs 'number' encompassing both integer, rational and real"
+  []
   (let [tag (fn [x] (attach-tag 'number x))]
     (put-op 'add '(number number) #(tag (+ %1 %2)))
     (put-op 'sub '(number number) #(tag (- %1 %2)))
@@ -234,29 +235,30 @@
                 (mk-poly 'a [[1 n2] [2 n3]]))
            (mk-poly 'a [[1 n1] [2 n1]])))))
 
-; 2.89
-;
-; Define a non-sparse representation of polynomials. In this exercise
-; polynomials will be represented as lists containing the variable name as
-; their head element and the list of coefficients as the rest, e.g.
-;
-;     ['a 0 1 4 2]
-;
-; We will only modify the accessors so that they would return data compatible
-; with the operations defined in the original `install-poly-package`.
-;
-; To make the reuse of the operations possible, we need to maintain the
-; contract of `term-list`, `first-term`, `rest-terms`, `empty-termlist?`,
-; `make-term`, `coeff` and `order`. As we don't store the order in our compact
-; reprsentation, we need to be able to figure out the order of a term when
-; given access to any sub-list of terms (result of `rest-terms`), which means
-; that we need to store the total number of terms in the polynomial somewhere.
-;
-; The easiest way to do that is to append the number of terms to the end of the
-; term list. We can either use a number, which is very risky as there's no way
-; to determine whether the number is a valid coefficient or a piece of
-; metadata, or as a tagged structure containing the number, say `{:size x}`.
-
+;; ## 2.89
+;;
+;; Define a non-sparse representation of polynomials.
+;;
+;; In this exercise polynomials will be represented as lists containing the
+;; variable name as their head element and the list of coefficients as the
+;; rest, e.g.
+;;
+;;     ['a 0 1 4 2]
+;;
+;; We will only modify the accessors so that they would return data compatible
+;; with the operations defined in the original `install-poly-package`.
+;;
+;; To make the reuse of the operations possible, we need to maintain the
+;; contract of `term-list`, `first-term`, `rest-terms`, `empty-termlist?`,
+;; `make-term`, `coeff` and `order`. As we don't store the order in our compact
+;; reprsentation, we need to be able to figure out the order of a term when
+;; given access to any sub-list of terms (result of `rest-terms`), which means
+;; that we need to store the total number of terms in the polynomial somewhere.
+;;
+;; The easiest way to do that is to append the number of terms to the end of the
+;; term list. We can either use a number, which is very risky as there's no way
+;; to determine whether the number is a valid coefficient or a piece of
+;; metadata, or as a tagged structure containing the number, say `{:size x}`.
 (defn install-poly-package-2 []
   (let [make-poly (fn [vari terms]
           (if (empty? terms)
@@ -332,55 +334,56 @@
                 (mk-poly2 'a [n2 n3]))
            (mk-poly2 'a [n4 n6])))))
 
-; 2.90
-;
-; Reengineer the polynomial packages so that there would remain only one
-; package which could handle both sparse and compact representations. It will
-; be analogous to the complex package which can handle 'rectangular and 'polar
-; representations of complex numbers.
-;
-; We will have to work with two representations:
-; * ['a [0 1] [2 3]] - sparse
-; * ['a 0 1 4 2] - compact
-;
-; Usually the cause of such a change in a system is either:
-;
-; * the need to support a different data representation (integration with a
-;   separate system)
-; * the need for better performance characteristics (different representations
-;   for different use cases)
-;
-; Both reasons are valid and require similar functionality (at least from the
-; user's perspective), but the approaches to their implementation most often are
-; completely dissimilar. Changes for the sake of integration with a different
-; data representation prioritize:
-;
-; * Stability of the API
-; * Ease of use
-; * Minimization of risk (as little as possible changes to the existing codebase)
-;
-; on the other hand, changes which address performance issues have one priority
-; which overshadows all of the other concerns - maximum positive performance
-; impact.
-;
-; With regards to the following exercise, performance related changes would
-; require us to implement all of the operations (add/sub/mul/...) in the most
-; efficient way possible. This would probably mean one implementation for each
-; data representation, together with selectors and related stuff. We could make
-; all of the reusable procedures dispatch through `apply-generic` and neatly
-; separate packages for 'sparse and 'compact representations.
-;
-; The 'integration' scenario, on the other hand, can be implemented with much
-; less effort, by reusing most of the original implementation for the 'sparse
-; data representation. We could convert the input representation into the
-; 'sparse one on every input and tag it with whatever type it was represented
-; originally. This would lead to larger memory footprint in some of the cases
-; (really compact polynomials) but performance isn't what we're aiming for, so
-; the solution would be acceptable.
+;; ## 2.90
+;;
+;; Reengineer the polynomial packages so that there would remain only one
+;; package which could handle both sparse and compact representations.
+;;
+;; The result will be analogous to the complex package which can handle
+;; `'rectangular` and `'polar` representations of complex numbers.  We will
+;; have to work with two representations:
+;;
+;; * ['a [0 1] [2 3]] - sparse
+;; * ['a 0 1 4 2] - compact
+;;
+;; Usually the cause of such a change in a system is either:
+;;
+;; * the need to support a different data representation (integration with a
+;;   separate system)
+;; * the need for better performance characteristics (different representations
+;;   for different use cases)
+;;
+;; Both reasons are valid and require similar functionality (at least from the
+;; user's perspective), but the approaches to their implementation most often are
+;; completely dissimilar. Changes for the sake of integration with a different
+;; data representation prioritize:
+;;
+;; * Stability of the API
+;; * Ease of use
+;; * Minimization of risk (as little as possible changes to the existing codebase)
+;;
+;; on the other hand, changes which address performance issues have one priority
+;; which overshadows all of the other concerns - maximum positive performance
+;; impact.
+;;
+;; With regards to the following exercise, performance related changes would
+;; require us to implement all of the operations (`add`/`sub`/`mul`/...) in the
+;; most efficient way possible. This would probably mean one implementation for
+;; each data representation, together with selectors and related stuff. We
+;; could make all of the reusable procedures dispatch through `apply-generic`
+;; and neatly separate packages for `'sparse` and `'compact` representations.
+;;
+;; The *integration* scenario, on the other hand, can be implemented with much
+;; less effort, by reusing most of the original implementation for the
+;; `'sparse` data representation. We could convert the input representation
+;; into the `'sparse` one on every input and tag it with whatever type it was
+;; represented originally. This would lead to larger memory footprint in some
+;; of the cases (really compact polynomials) but performance isn't what we're
+;; aiming for, so the solution would be acceptable.
 
-;(defn install-poly-package-3 []
-;  (let [tag (fn [x] x)]
-;    (put-op 'add '(poly poly) #(tag (add-poly %1 %2)))
-;    (put-op 'make 'poly #(tag (make-poly %1 %2)))))
+;;(defn install-poly-package-3 []
+;;  (let [tag (fn [x] x)]
+;;    (put-op 'add '(poly poly) #(tag (add-poly %1 %2)))
+;;    (put-op 'make 'poly #(tag (make-poly %1 %2)))))
 
 (run-tests 'e2-87-to-91)
