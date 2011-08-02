@@ -2532,6 +2532,9 @@ $(document).ready(function() {
   (:use [util.util :only (id compose square curry)])
   (:use [clojure.contrib.math :only (gcd sqrt)])
   (:use [clojure.contrib.test-is :only (deftest is run-tests)]))</pre></tr><tr><td class="docs"><h3>1.30</h3>
+
+<p>The <code>sum</code> procedure in the previous chapter generates a linear recursion.
+The procedure can be rewritten so that the sum is performed iteratively.</p>
 </td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn sum-iter [term a nextf b]
   (defn iter [a result]
@@ -2543,6 +2546,11 @@ $(document).ready(function() {
   (sum-iter id a inc b))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest test-sum-ints
   (is (= (sum-ints 1 10) 55)))</pre></tr><tr><td class="docs"><h3>1.31</h3>
+
+<p>The sum procedure is only the simplest of a vast number of similar
+abstractions that can be captured as higher-order procedures. Write an
+analogous procedure called <code>product</code> that returns the product of the values
+of a function at points over a given range.</p>
 </td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn product-31 [term a next b]
   (if (&gt; a b)
@@ -2550,7 +2558,10 @@ $(document).ready(function() {
       (* (term a)
          (product-31 term (next a) next b))))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest product-test-31
-  (is (= (product-31 id 1 inc 10) 3628800)))</pre></tr><tr><td class="docs">
+  (is (= (product-31 id 1 inc 10) 3628800)))</pre></tr><tr><td class="docs"><p>If your product procedure generates a recursive process, write one that
+generates an iterative process. If it generates an iterative process, write
+one that generates a recursive process.</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn product-iter [term a nextf b]
   (let [iter (fn [a result]
     (if (&gt; a b)
@@ -2558,11 +2569,13 @@ $(document).ready(function() {
         (recur (nextf a) (* result (term a)))))]
   (iter a 1)))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest product-iter-test
-  (is (= (product-iter id 1 inc 10) 3628800)))</pre></tr><tr><td class="docs">
+  (is (= (product-iter id 1 inc 10) 3628800)))</pre></tr><tr><td class="docs"><p>Show how to define <code>factorial</code> in terms of <code>product</code>:</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn fact [x]
   (product-31 id 1 inc x))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn twoinc [x]
-  ((compose inc inc) x))</pre></tr><tr><td class="docs"><p>Calculates pi with the specified accuracy</p>
+  ((compose inc inc) x))</pre></tr><tr><td class="docs"><p>Also use <code>product</code> to compute approximations to <code>pi</code>:</p>
+</td><td class="codes" /></tr><tr><td class="docs"><p>Calculates pi with the specified accuracy</p>
 </td><td class="codes" /><pre class="brush: clojure">(defn pi
   [acc]
   (let [upper (product-31 id 4 twoinc (- acc 1)) ; 4*6*8*...*k, k &lt; acc
@@ -2575,12 +2588,28 @@ $(document).ready(function() {
           (* factor (square (/ lower factor))))))) ; 3*3*5*5*...*(l-2)*(l-2)*l, l &lt;= acc</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest pi-test
   (is (= (double (pi 600)) 3.138971384492951)))</pre></tr><tr><td class="docs"><h3>1.32</h3>
+
+<p>Show that sum and product (exercise 1.31) are both special cases of a still
+more general notion called accumulate that combines a collection of terms,
+using some general accumulation function:</p>
+
+<p><code>(accumulate combiner null-value term a next b)</code></p>
+
+<p>Accumulate takes as arguments the same term and range specifications as sum
+and product, together with a combiner procedure (of two arguments) that
+specifies how the current term is to be combined with the accumulation of
+the preceding terms and a null-value that specifies what base value to use
+when the terms run out. Write <code>accumulate</code> and show how <code>sum</code> and <code>product</code>
+can both be defined as simple calls to <code>accumulate.</code></p>
 </td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn accumulate [combiner zero term a nextf b]
   (if (&gt; a b)
       zero
       (combiner (term a)
-                (accumulate combiner zero term (nextf a) nextf b))))</pre></tr><tr><td class="docs">
+                (accumulate combiner zero term (nextf a) nextf b))))</pre></tr><tr><td class="docs"><p>If your <code>accumulate</code> procedure generates a recursive process, write one that
+generates an iterative process. If it generates an iterative process, write
+one that generates a recursive process.</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn accumulate-iter [combiner zero term a nextf b]
     (let [iter (fn [a result]
                  (if (&gt; a b)
@@ -2595,6 +2624,14 @@ $(document).ready(function() {
   (is (= (sum square 1 inc 10) 385)))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest product-test
   (is (= (product square 1 inc 10) 13168189440000)))</pre></tr><tr><td class="docs"><h3>1.33</h3>
+
+<p>You can obtain an even more general version of accumulate (exercise 1.32) by
+introducing the notion of a filter on the terms to be combined. That is,
+combine only those terms derived from values in the range that satisfy a
+specified condition. The resulting <code>filtered-accumulate</code> abstraction takes the
+same arguments as <code>accumulate</code>, together with an additional predicate of one
+argument that specifies the filter. Write <code>filtered-accumulate</code> as a
+procedure.</p>
 </td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn filtered-acc [filterf combiner zero term a nextf b]
   (if (&gt; a b)
@@ -2618,14 +2655,20 @@ $(document).ready(function() {
 </td><td class="codes" /><pre class="brush: clojure">(deftest prime-test-2
   (is (= (prime? 3) true))
   (is (= (prime? 37) true))
-  (is (= (prime? 254) false)))</pre></tr><tr><td class="docs">
+  (is (= (prime? 254) false)))</pre></tr><tr><td class="docs"><p>Show how to express the following using <code>filtered-accumulate</code>:</p>
+</td><td class="codes" /></tr><tr><td class="docs"><ul>
+<li>the sum of the squares of the prime numbers in the interval <code>a</code> to <code>b</code>:</li>
+</ul>
 </td><td class="codes" /><pre class="brush: clojure">(defn squares [a b]
   (filtered-acc prime? + 0 square a inc b))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest squares-test
-  (is (= (squares 1 10) 84)))</pre></tr><tr><td class="docs">
+  (is (= (squares 1 10) 84)))</pre></tr><tr><td class="docs"><ul>
+<li>the product of all the positive integers less than <code>n</code> that are relatively
+prime to <code>n</code> (i.e., all positive integers <code>i &lt; n</code> such that <code>GCD(i,n) = 1</code>).</li>
+</ul>
 </td><td class="codes" /><pre class="brush: clojure">(defn prod-less-than [n]
   (filtered-acc (curry prime-for? n) + 0 id 1 inc n))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(deftest squares-test
   (is (= (prod-less-than 10) 20)))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(run-tests 'e1-30-to-33)</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_e1-11-12">e1-11-12</li><li class="floating-toc-li" id="floating-toc_e1-16-to-19">e1-16-to-19</li><li class="floating-toc-li" id="floating-toc_e1-20">e1-20</li><li class="floating-toc-li" id="floating-toc_e1-29">e1-29</li><li class="floating-toc-li" id="floating-toc_e1-30-to-33">e1-30-to-33</li><li class="floating-toc-li" id="floating-toc_e1-35-36">e1-35-36</li><li class="floating-toc-li" id="floating-toc_e1-37-38-39">e1-37-38-39</li><li class="floating-toc-li" id="floating-toc_e1-40-41-42">e1-40-41-42</li><li class="floating-toc-li" id="floating-toc_e1-43-44-45-46">e1-43-44-45-46</li><li class="floating-toc-li" id="floating-toc_e2-1">e2-1</li><li class="floating-toc-li" id="floating-toc_e2-12-13-14-15-16">e2-12-13-14-15-16</li><li class="floating-toc-li" id="floating-toc_e2-17-18-19-20">e2-17-18-19-20</li><li class="floating-toc-li" id="floating-toc_e2-21-22-23">e2-21-22-23</li><li class="floating-toc-li" id="floating-toc_e2-24-25-26-27-28-29">e2-24-25-26-27-28-29</li><li class="floating-toc-li" id="floating-toc_e2-2-3">e2-2-3</li><li class="floating-toc-li" id="floating-toc_e2-30-31-32">e2-30-31-32</li><li class="floating-toc-li" id="floating-toc_e2-33-to-39">e2-33-to-39</li><li class="floating-toc-li" id="floating-toc_e2-40-to-43">e2-40-to-43</li><li class="floating-toc-li" id="floating-toc_e2-44-45">e2-44-45</li><li class="floating-toc-li" id="floating-toc_e2-46-to-51">e2-46-to-51</li><li class="floating-toc-li" id="floating-toc_e2-4-5-6">e2-4-5-6</li><li class="floating-toc-li" id="floating-toc_e2-53-54-55">e2-53-54-55</li><li class="floating-toc-li" id="floating-toc_e2-56-57-58">e2-56-57-58</li><li class="floating-toc-li" id="floating-toc_e2-59-60">e2-59-60</li><li class="floating-toc-li" id="floating-toc_e2-61-62">e2-61-62</li><li class="floating-toc-li" id="floating-toc_e2-63-to-66">e2-63-to-66</li><li class="floating-toc-li" id="floating-toc_e2-67-to-72">e2-67-to-72</li><li class="floating-toc-li" id="floating-toc_e2-73-74">e2-73-74</li><li class="floating-toc-li" id="floating-toc_e2-75-76">e2-75-76</li><li class="floating-toc-li" id="floating-toc_e2-77-to-80">e2-77-to-80</li><li class="floating-toc-li" id="floating-toc_e2-7-8-9-10-11">e2-7-8-9-10-11</li><li class="floating-toc-li" id="floating-toc_e2-81-to-86">e2-81-to-86</li><li class="floating-toc-li" id="floating-toc_e2-87-to-91">e2-87-to-91</li><li class="floating-toc-li" id="floating-toc_util.interval">util.interval</li><li class="floating-toc-li" id="floating-toc_util.util">util.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+</td><td class="codes" /><pre class="brush: clojure">(run-tests 'e1-30-to-33)</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_e1-11-12">e1-11-12</li><li class="floating-toc-li" id="floating-toc_e1-16-to-19">e1-16-to-19</li><li class="floating-toc-li" id="floating-toc_e1-21">e1-21</li><li class="floating-toc-li" id="floating-toc_e1-29">e1-29</li><li class="floating-toc-li" id="floating-toc_e1-30-to-33">e1-30-to-33</li><li class="floating-toc-li" id="floating-toc_e1-35-36">e1-35-36</li><li class="floating-toc-li" id="floating-toc_e1-37-38-39">e1-37-38-39</li><li class="floating-toc-li" id="floating-toc_e1-40-41-42">e1-40-41-42</li><li class="floating-toc-li" id="floating-toc_e1-43-44-45-46">e1-43-44-45-46</li><li class="floating-toc-li" id="floating-toc_e2-1">e2-1</li><li class="floating-toc-li" id="floating-toc_e2-12-13-14-15-16">e2-12-13-14-15-16</li><li class="floating-toc-li" id="floating-toc_e2-17-18-19-20">e2-17-18-19-20</li><li class="floating-toc-li" id="floating-toc_e2-21-22-23">e2-21-22-23</li><li class="floating-toc-li" id="floating-toc_e2-24-25-26-27-28-29">e2-24-25-26-27-28-29</li><li class="floating-toc-li" id="floating-toc_e2-2-3">e2-2-3</li><li class="floating-toc-li" id="floating-toc_e2-30-31-32">e2-30-31-32</li><li class="floating-toc-li" id="floating-toc_e2-33-to-39">e2-33-to-39</li><li class="floating-toc-li" id="floating-toc_e2-40-to-43">e2-40-to-43</li><li class="floating-toc-li" id="floating-toc_e2-44-45">e2-44-45</li><li class="floating-toc-li" id="floating-toc_e2-46-to-51">e2-46-to-51</li><li class="floating-toc-li" id="floating-toc_e2-4-5-6">e2-4-5-6</li><li class="floating-toc-li" id="floating-toc_e2-53-54-55">e2-53-54-55</li><li class="floating-toc-li" id="floating-toc_e2-56-57-58">e2-56-57-58</li><li class="floating-toc-li" id="floating-toc_e2-59-60">e2-59-60</li><li class="floating-toc-li" id="floating-toc_e2-61-62">e2-61-62</li><li class="floating-toc-li" id="floating-toc_e2-63-to-66">e2-63-to-66</li><li class="floating-toc-li" id="floating-toc_e2-67-to-72">e2-67-to-72</li><li class="floating-toc-li" id="floating-toc_e2-73-74">e2-73-74</li><li class="floating-toc-li" id="floating-toc_e2-75-76">e2-75-76</li><li class="floating-toc-li" id="floating-toc_e2-77-to-80">e2-77-to-80</li><li class="floating-toc-li" id="floating-toc_e2-7-8-9-10-11">e2-7-8-9-10-11</li><li class="floating-toc-li" id="floating-toc_e2-81-to-86">e2-81-to-86</li><li class="floating-toc-li" id="floating-toc_e2-87-to-91">e2-87-to-91</li><li class="floating-toc-li" id="floating-toc_util.interval">util.interval</li><li class="floating-toc-li" id="floating-toc_util.util">util.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
        SyntaxHighlighter.all()</script></body></html>

@@ -2527,19 +2527,31 @@ $(document).ready(function() {
     ul.css('margin-top', '0px')
 
 })
-</script><title>sicp -- Marginalia</title></head><body><table><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#e2-12-13-14-15-16" name="e2-12-13-14-15-16"><h1 class="project-name">e2-12-13-14-15-16</h1><a class="toc-link" href="index.html">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</script><title>sicp -- Marginalia</title></head><body><table><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#e2-12-13-14-15-16" name="e2-12-13-14-15-16"><h1 class="project-name">e2-12-13-14-15-16</h1><a class="toc-link" href="index.html">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h2>Exercises 2.12 - 2.16</h2>
 </td><td class="codes" /><pre class="brush: clojure">(ns e2-12-13-14-15-16
   (:use [clojure.contrib.test-is :only (deftest is run-tests)])
   (:use [util.interval :only (make-interval lower-bound upper-bound mul-interval div-interval add-interval)])
-  (:use [clojure.contrib.math :only (round)]))</pre></tr><tr><td class="docs"><p>Here's a fragment of code transcribed from the many carvings on the walls of her room:</p>
+  (:use [clojure.contrib.math :only (round)]))</pre></tr><tr><td class="docs"><h2>2.12</h2>
+
+<p>Lisa got into trouble again by not looking at the specs and not listening to
+the BAs.  Turns out all of the intervals she manufactured were to be
+discarded as their representation didn't suit business needs. The fact
+struck Lisa like a scythe strikes ripe rye.  After getting out of rehab Lisa
+got obsessed with various representations of intervals... You could often
+hear her silently weep in her room...</p>
+
+<p>Here's a fragment of code transcribed from the many carvings on the walls of her room:</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn make-center-width [c w]
   (make-interval (- c w) (+ c w)))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn center [i]
   (/ (+ (lower-bound i) (upper-bound i)) 2))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn width [i]
-  (/ (- (upper-bound i) (lower-bound i)) 2))</pre></tr><tr><td class="docs"><p> @param mid - midpoint-interval
-    @param p - percent = radius-interval / midpoint-interval
-               radius-interval = 1/2 * (upper-bound - lower-bound) => radius is always > 0 </p>
+  (/ (- (upper-bound i) (lower-bound i)) 2))</pre></tr><tr><td class="docs"><ul>
+<li><code>mid</code> - midpoint-interval
+<ul><li><code>p</code> - percent = radius-interval / midpoint-interval where radius-interval = 1/2 * (upper-bound - lower-bound)
+             radius is always > 0</li></ul></li>
+</ul>
 </td><td class="codes" /><pre class="brush: clojure">(defn make-center-percent
   [mid p]
   (let [r (if (= mid 0)
@@ -2559,7 +2571,20 @@ $(document).ready(function() {
 </td><td class="codes" /><pre class="brush: clojure">(deftest percent-test
   (is (= (percent-interval (make-interval 0.9 1.1)) 10))
   (is (= (percent-interval (make-interval -5 -15)) 50))
-  (is (= (percent-interval (make-interval -0.1 0.1)) 10)))</pre></tr><tr><td class="docs">
+  (is (= (percent-interval (make-interval -0.1 0.1)) 10)))</pre></tr><tr><td class="docs"><h3>2.13</h3>
+
+<p>We need to approximate the product of the two intervals given their centers and deviation percentage.
+Assume all numbers are positive, <code>da</code> = deviation a, <code>ca</code> = center a,</p>
+
+<ul>
+<li>a = <code>[ca - da*ca, ca + da*ca]</code> = <code>[ca*(1 - da), ca*(1 + da)]</code></li>
+<li>b = <code>[cb - db*cb, cb + db*cb]</code> = <code>[cb*(1 - db), cb*(1 + db)]</code></li>
+<li>a*b = <code>[ca*cb*(1 - da)(1 - db), ca*cb*(1 + da)(1 + db)]</code> = <code>[ca*cb*(1 - (da + db - da*db)), ca*cb*(1 + (da + db + da*db))]</code></li>
+</ul>
+
+<p>We can see that deviation of the product = <code>(da + db - da*db)</code> which is approaching <code>(da + db)</code> if <code>da</code> and <code>db</code> approach 0.
+Conclusion: deviation of the product may be approximated by the sum of deviations of multiplicand and multiplier.</p>
+</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn low-percent? [p]
   (&lt; p 10))</pre></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn percent-mul-intervals [a b]
@@ -2573,21 +2598,71 @@ $(document).ready(function() {
           (= (percent-mul-intervals a a) (percent-interval (mul-interval a a)))))
   (is (let [a (make-center-percent 1 5)
             b (make-center-percent 6 9)]
-          (= (percent-mul-intervals a b) (percent-interval (mul-interval a b))))))</pre></tr><tr><td class="docs">
+          (= (percent-mul-intervals a b) (percent-interval (mul-interval a b))))))</pre></tr><tr><td class="docs"><h3>2.14</h3>
+
+<p>Lem E. Tweakit is way too smart, he should be beaten into submission.</p>
+</td><td class="codes" /></tr><tr><td class="docs"><p>We have two ways of calculating the result:</p>
+</td><td class="codes" /></tr><tr><td class="docs"><ol>
+<li><code>r1*r2 / (r1 + r2)</code></li>
+</ol>
 </td><td class="codes" /><pre class="brush: clojure">(defn par1 [r1 r2]
   (div-interval (mul-interval r1 r2)
-                (add-interval r1 r2)))</pre></tr><tr><td class="docs">
+                (add-interval r1 r2)))</pre></tr><tr><td class="docs"><ol>
+<li><code>1 / (1/r1 + 1/r2)</code></li>
+</ol>
 </td><td class="codes" /><pre class="brush: clojure">(defn par2 [r1 r2]
   (let [one (make-interval 1 1)]
     (div-interval one
                   (add-interval (div-interval one r1)
-                                (div-interval one r2)))))</pre></tr><tr><td class="docs">
+                                (div-interval one r2)))))</pre></tr><tr><td class="docs"><p>We can get the latter formula by dividing the former one by <code>r1*r2</code>.
+We can get the former formula by multiplying the denominator of the latter one by <code>r2/r2</code>,
+which shouldn't change the result, as <code>r2/r2 = 1</code>. Or should it?</p>
+</td><td class="codes" /></tr><tr><td class="docs"><p><code>par1</code> and <code>par2</code> do indeed return different results. Question is, which one
+is better? And why are they different if the formulas are equivalent?</p>
 </td><td class="codes" /><pre class="brush: clojure">(deftest par12-test
   (let [a (make-center-percent 1 5)
         b (make-center-percent 5 10)
         c (make-interval -5 20)]
     (is (not (= (par1 a a) (par2 a a))))
     (is (not (= (par1 a b) (par2 a b))))
-    (is (not (= (par1 a c) (par2 a c))))))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(run-tests 'e2-12-13-14-15-16)</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_e1-11-12">e1-11-12</li><li class="floating-toc-li" id="floating-toc_e1-16-to-19">e1-16-to-19</li><li class="floating-toc-li" id="floating-toc_e1-20">e1-20</li><li class="floating-toc-li" id="floating-toc_e1-29">e1-29</li><li class="floating-toc-li" id="floating-toc_e1-30-to-33">e1-30-to-33</li><li class="floating-toc-li" id="floating-toc_e1-35-36">e1-35-36</li><li class="floating-toc-li" id="floating-toc_e1-37-38-39">e1-37-38-39</li><li class="floating-toc-li" id="floating-toc_e1-40-41-42">e1-40-41-42</li><li class="floating-toc-li" id="floating-toc_e1-43-44-45-46">e1-43-44-45-46</li><li class="floating-toc-li" id="floating-toc_e2-1">e2-1</li><li class="floating-toc-li" id="floating-toc_e2-12-13-14-15-16">e2-12-13-14-15-16</li><li class="floating-toc-li" id="floating-toc_e2-17-18-19-20">e2-17-18-19-20</li><li class="floating-toc-li" id="floating-toc_e2-21-22-23">e2-21-22-23</li><li class="floating-toc-li" id="floating-toc_e2-24-25-26-27-28-29">e2-24-25-26-27-28-29</li><li class="floating-toc-li" id="floating-toc_e2-2-3">e2-2-3</li><li class="floating-toc-li" id="floating-toc_e2-30-31-32">e2-30-31-32</li><li class="floating-toc-li" id="floating-toc_e2-33-to-39">e2-33-to-39</li><li class="floating-toc-li" id="floating-toc_e2-40-to-43">e2-40-to-43</li><li class="floating-toc-li" id="floating-toc_e2-44-45">e2-44-45</li><li class="floating-toc-li" id="floating-toc_e2-46-to-51">e2-46-to-51</li><li class="floating-toc-li" id="floating-toc_e2-4-5-6">e2-4-5-6</li><li class="floating-toc-li" id="floating-toc_e2-53-54-55">e2-53-54-55</li><li class="floating-toc-li" id="floating-toc_e2-56-57-58">e2-56-57-58</li><li class="floating-toc-li" id="floating-toc_e2-59-60">e2-59-60</li><li class="floating-toc-li" id="floating-toc_e2-61-62">e2-61-62</li><li class="floating-toc-li" id="floating-toc_e2-63-to-66">e2-63-to-66</li><li class="floating-toc-li" id="floating-toc_e2-67-to-72">e2-67-to-72</li><li class="floating-toc-li" id="floating-toc_e2-73-74">e2-73-74</li><li class="floating-toc-li" id="floating-toc_e2-75-76">e2-75-76</li><li class="floating-toc-li" id="floating-toc_e2-77-to-80">e2-77-to-80</li><li class="floating-toc-li" id="floating-toc_e2-7-8-9-10-11">e2-7-8-9-10-11</li><li class="floating-toc-li" id="floating-toc_e2-81-to-86">e2-81-to-86</li><li class="floating-toc-li" id="floating-toc_e2-87-to-91">e2-87-to-91</li><li class="floating-toc-li" id="floating-toc_util.interval">util.interval</li><li class="floating-toc-li" id="floating-toc_util.util">util.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+    (is (not (= (par1 a c) (par2 a c))))))</pre></tr><tr><td class="docs"><p>The answer is in the result of <code>r2/r2</code>. We're talking about intervals here,
+so <code>r2/r2</code> doesn't necessary equal to 1.  Herein lies the problem (I
+confess, I lifted the answer to this one from the internets) - the formulas
+aren't equivalent if we're talking intervals.</p>
+</td><td class="codes" /></tr><tr><td class="docs"><h3>2.15</h3>
+
+<p>Eva Lu Ator suggests that <code>par2</code> is better than <code>par1.</code></p>
+
+<p><code>par1</code> performs (assume <code>r1=[lr1, ur1]</code> and <code>r2=[lr2, ur2]</code> are positive intervals):</p>
+
+<ol>
+<li>([lr1, ur1] * [lr2, ur2]) / ([lr1, ur1] + [lr2, ur2])</li>
+<li>[(lr1 * lr2), (ur1 * ur2)] / [(lr1 + lr2), (ur1 + ur2)]</li>
+<li>[((lr1 * lr2) * (1 / (ur1 + ur2))), ((ur1 * ur2) * (1 / (lr1 + lr2)))]</li>
+<li>[(lr1 * lr2) / (ur1 + ur2), (ur1 * ur2) / (lr1 + lr2)]</li>
+</ol>
+
+<p><code>par2</code>:</p>
+
+<ol>
+<li>[1, 1] / (([1, 1] / [lr1, ur1]) + ([1, 1] / [lr2, ur2]))</li>
+<li>[1, 1] / ([(1 / ur1), (1 / lr1)] + [1 / ur2, 1 / lr2])</li>
+<li>[1, 1] / [(1 / ur1) + (1 / ur2), (1 / lr1) + (1 / lr2)]</li>
+<li>[1 / ((1 / lr1) + (1 / lr2)), 1 / ((1 / ur1) + (1 / ur2))]</li>
+</ol>
+
+<p>essentially it's all the same. However, we get less accuracy if we perform
+more operations on the incorrect intermediate results. And, as we get more
+intermediate results in <code>par1</code>, <code>par2</code> gets more accurate results.</p>
+</td><td class="codes" /></tr><tr><td class="docs"><h3>2.16</h3>
+
+<p>I lack the mathematical background for this one :) After reading a bit on
+intervals I seem to understand that they're lacking the properties of a field
+that the set <code>Z</code> (for example) holds. The zero for addition, the inverse for
+multiplication and the distributivity of multiplication over addition.  All
+the operations for intervals need to check for identity, so that</p>
+
+<p><code>r2/r2 = 1</code> iff <code>r2</code> IS <code>r2</code>.</p>
+</td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes" /><pre class="brush: clojure">(run-tests 'e2-12-13-14-15-16)</pre></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/fogus/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_e1-11-12">e1-11-12</li><li class="floating-toc-li" id="floating-toc_e1-16-to-19">e1-16-to-19</li><li class="floating-toc-li" id="floating-toc_e1-21">e1-21</li><li class="floating-toc-li" id="floating-toc_e1-29">e1-29</li><li class="floating-toc-li" id="floating-toc_e1-30-to-33">e1-30-to-33</li><li class="floating-toc-li" id="floating-toc_e1-35-36">e1-35-36</li><li class="floating-toc-li" id="floating-toc_e1-37-38-39">e1-37-38-39</li><li class="floating-toc-li" id="floating-toc_e1-40-41-42">e1-40-41-42</li><li class="floating-toc-li" id="floating-toc_e1-43-44-45-46">e1-43-44-45-46</li><li class="floating-toc-li" id="floating-toc_e2-1">e2-1</li><li class="floating-toc-li" id="floating-toc_e2-12-13-14-15-16">e2-12-13-14-15-16</li><li class="floating-toc-li" id="floating-toc_e2-17-18-19-20">e2-17-18-19-20</li><li class="floating-toc-li" id="floating-toc_e2-21-22-23">e2-21-22-23</li><li class="floating-toc-li" id="floating-toc_e2-24-25-26-27-28-29">e2-24-25-26-27-28-29</li><li class="floating-toc-li" id="floating-toc_e2-2-3">e2-2-3</li><li class="floating-toc-li" id="floating-toc_e2-30-31-32">e2-30-31-32</li><li class="floating-toc-li" id="floating-toc_e2-33-to-39">e2-33-to-39</li><li class="floating-toc-li" id="floating-toc_e2-40-to-43">e2-40-to-43</li><li class="floating-toc-li" id="floating-toc_e2-44-45">e2-44-45</li><li class="floating-toc-li" id="floating-toc_e2-46-to-51">e2-46-to-51</li><li class="floating-toc-li" id="floating-toc_e2-4-5-6">e2-4-5-6</li><li class="floating-toc-li" id="floating-toc_e2-53-54-55">e2-53-54-55</li><li class="floating-toc-li" id="floating-toc_e2-56-57-58">e2-56-57-58</li><li class="floating-toc-li" id="floating-toc_e2-59-60">e2-59-60</li><li class="floating-toc-li" id="floating-toc_e2-61-62">e2-61-62</li><li class="floating-toc-li" id="floating-toc_e2-63-to-66">e2-63-to-66</li><li class="floating-toc-li" id="floating-toc_e2-67-to-72">e2-67-to-72</li><li class="floating-toc-li" id="floating-toc_e2-73-74">e2-73-74</li><li class="floating-toc-li" id="floating-toc_e2-75-76">e2-75-76</li><li class="floating-toc-li" id="floating-toc_e2-77-to-80">e2-77-to-80</li><li class="floating-toc-li" id="floating-toc_e2-7-8-9-10-11">e2-7-8-9-10-11</li><li class="floating-toc-li" id="floating-toc_e2-81-to-86">e2-81-to-86</li><li class="floating-toc-li" id="floating-toc_e2-87-to-91">e2-87-to-91</li><li class="floating-toc-li" id="floating-toc_util.interval">util.interval</li><li class="floating-toc-li" id="floating-toc_util.util">util.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
        SyntaxHighlighter.all()</script></body></html>
