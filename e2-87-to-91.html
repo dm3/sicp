@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8" content="text/html" http-equiv="Content-Type" /><meta content="null" name="description" /><style type="text/css">/**
+<html><head><meta charset="utf-8" content="text/html" http-equiv="Content-Type" /><meta content="Exercises from the book 'Structure and Interpretation of Computer Programs'
+        (http://mitpress.mit.edu/sicp/full-text/book/book.html)." name="description" /><style type="text/css">/**
  * SyntaxHighlighter
  * http://alexgorbatchev.com/SyntaxHighlighter
  *
@@ -2593,9 +2594,9 @@ framework before us.</p>
 (defn gt [x y]
   (apply-generic 'gt x y))
 (defn lt [x y]
-  (apply-generic 'lt x y))</pre></tr><tr><td class="docs">
-</td><td class="codes" /><pre class="brush: clojure">(defn install-number-package []
-  &quot;Installs 'number' encompassing both integer, rational and real&quot;
+  (apply-generic 'lt x y))</pre></tr><tr><td class="docs"><p>Installs 'number' encompassing both integer, rational and real</p>
+</td><td class="codes" /><pre class="brush: clojure">(defn install-number-package
+  []
   (let [tag (fn [x] (attach-tag 'number x))]
     (put-op 'add '(number number) #(tag (+ %1 %2)))
     (put-op 'sub '(number number) #(tag (- %1 %2)))
@@ -2724,9 +2725,13 @@ framework before us.</p>
     (is (= (sub n2 n1) n1))
     (is (= (sub (mk-poly 'a [[1 n3] [2 n4]])
                 (mk-poly 'a [[1 n2] [2 n3]]))
-           (mk-poly 'a [[1 n1] [2 n1]])))))</pre></tr><tr><td class="docs"><p>Define a non-sparse representation of polynomials. In this exercise
-polynomials will be represented as lists containing the variable name as
-their head element and the list of coefficients as the rest, e.g.</p>
+           (mk-poly 'a [[1 n1] [2 n1]])))))</pre></tr><tr><td class="docs"><h2>2.89</h2>
+
+<p>Define a non-sparse representation of polynomials.</p>
+
+<p>In this exercise polynomials will be represented as lists containing the
+variable name as their head element and the list of coefficients as the
+rest, e.g.</p>
 
 <p>['a 0 1 4 2]</p>
 
@@ -2744,7 +2749,6 @@ that we need to store the total number of terms in the polynomial somewhere.</p>
 term list. We can either use a number, which is very risky as there's no way
 to determine whether the number is a valid coefficient or a piece of
 metadata, or as a tagged structure containing the number, say <code>{:size x}</code>.</p>
-</td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes" /><pre class="brush: clojure">(defn install-poly-package-2 []
   (let [make-poly (fn [vari terms]
           (if (empty? terms)
@@ -2804,14 +2808,19 @@ metadata, or as a tagged structure containing the number, say <code>{:size x}</c
         n3 (mk-number 3) n4 (mk-number 4) n6 (mk-number 6)]
     (is (= (add (mk-poly2 'a [n2 n3])
                 (mk-poly2 'a [n2 n3]))
-           (mk-poly2 'a [n4 n6])))))</pre></tr><tr><td class="docs"><p>Reengineer the polynomial packages so that there would remain only one
-package which could handle both sparse and compact representations. It will
-be analogous to the complex package which can handle 'rectangular and 'polar
-representations of complex numbers.</p>
+           (mk-poly2 'a [n4 n6])))))</pre></tr><tr><td class="docs"><h2>2.90</h2>
 
-<p>We will have to work with two representations:
-* ['a [0 1] [2 3]] - sparse
-* ['a 0 1 4 2] - compact</p>
+<p>Reengineer the polynomial packages so that there would remain only one
+package which could handle both sparse and compact representations.</p>
+
+<p>The result will be analogous to the complex package which can handle
+<code>'rectangular</code> and <code>'polar</code> representations of complex numbers.  We will
+have to work with two representations:</p>
+
+<ul>
+<li>['a [0 1] [2 3]] - sparse</li>
+<li>['a 0 1 4 2] - compact</li>
+</ul>
 
 <p>Usually the cause of such a change in a system is either:</p>
 
@@ -2838,19 +2847,19 @@ which overshadows all of the other concerns - maximum positive performance
 impact.</p>
 
 <p>With regards to the following exercise, performance related changes would
-require us to implement all of the operations (add/sub/mul/...) in the most
-efficient way possible. This would probably mean one implementation for each
-data representation, together with selectors and related stuff. We could make
-all of the reusable procedures dispatch through <code>apply-generic</code> and neatly
-separate packages for 'sparse and 'compact representations.</p>
+require us to implement all of the operations (<code>add</code>/<code>sub</code>/<code>mul</code>/...) in the
+most efficient way possible. This would probably mean one implementation for
+each data representation, together with selectors and related stuff. We
+could make all of the reusable procedures dispatch through <code>apply-generic</code>
+and neatly separate packages for <code>'sparse</code> and <code>'compact</code> representations.</p>
 
-<p>The 'integration' scenario, on the other hand, can be implemented with much
-less effort, by reusing most of the original implementation for the 'sparse
-data representation. We could convert the input representation into the
-'sparse one on every input and tag it with whatever type it was represented
-originally. This would lead to larger memory footprint in some of the cases
-(really compact polynomials) but performance isn't what we're aiming for, so
-the solution would be acceptable.</p>
+<p>The <em>integration</em> scenario, on the other hand, can be implemented with much
+less effort, by reusing most of the original implementation for the
+<code>'sparse</code> data representation. We could convert the input representation
+into the <code>'sparse</code> one on every input and tag it with whatever type it was
+represented originally. This would lead to larger memory footprint in some
+of the cases (really compact polynomials) but performance isn't what we're
+aiming for, so the solution would be acceptable.</p>
 </td><td class="codes" /></tr><tr><td class="docs"><p>(defn install-poly-package-3 []
 (let [tag (fn [x] x)]
 (put-op 'add '(poly poly) #(tag (add-poly %1 %2)))
